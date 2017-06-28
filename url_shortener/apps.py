@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class UrlShortenerConfig(AppConfig):
+class URLShortenerConfig(AppConfig):
     name = 'url_shortener'
