@@ -1,6 +1,6 @@
 import re
 from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator
+from django.core.validators import URLValidator, RegexValidator
 from django.db import models
 from django.utils import timezone
 
@@ -10,19 +10,23 @@ URL_MAX_SHORT_ID_LEN = 12
 URL_MAX_URL_LEN = 2047
 
 class URL(models.Model):
-    short_id = models.CharField(max_length=URL_MAX_SHORT_ID_LEN, primary_key=True)
+    alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
+    # Set custom error message so it will never change with django updates.
+    # This is a hack to be able to test on what ValidationError actually
+    # occured.
+    short_id_error = {
+        'unique': 'Short id already used.'
+    }
+    short_id = models.CharField(
+        max_length=URL_MAX_SHORT_ID_LEN,
+        primary_key=True,
+        validators=[alphanumeric]
+    )
     url = models.URLField(max_length=URL_MAX_URL_LEN)
     added_date = models.DateTimeField('date added',
                                       default=timezone.now)
 
-    def clean(self):
-        # TODO: make max length and possible chars a setting or global variable
-        if re.match('^[a-zA-Z0-9]{1,' + URL_MAX_SHORT_ID_LEN + '}$', self.short_id) is None:
-            raise ValidationError({'short_id':
-                'short_id must contain only a-zA-Z0-9 and max length of ' +
-                                   URL_MAX_SHORT_ID_LEN
-            })
-
+    # Overide save to automatically validate
     def save(self, *args, **kwargs):
         self.full_clean()
         super(URL, self).save(*args, **kwargs)
