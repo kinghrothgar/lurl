@@ -20,3 +20,11 @@ After everything has come up completely you'll need to run the migrations. You'l
 Once you see this log, run this in a different terminal in the repo root:
 
     docker-compose exec django python manage.py migrate
+
+## Using Example
+
+    > curl -H "Content-Type: application/json" -XPOST -d '{"url":"https://gobin.com"}' localhost:8000/new
+    {"short_id":"LpiqCm","url":"https://gobin.com","added_date":"2017-06-30T00:29:19.893205Z"}
+    > curl -XGET 127.0.0.1:8000/LpiqCm
+    {"short_id":"LpiqCm","url":"https://gobin.com","added_date":"2017-06-30T00:29:19.893205Z"}%
+    > curl -XDELETE 127.0.0.1:8000/LpiqCm
